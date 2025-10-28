@@ -1,4 +1,3 @@
-fastapi
-uvicorn
-jinja2
-
+echo fastapi > requirements.txt
+echo uvicorn >> requirements.txt
+echo jinja2 >> requirements.txt
