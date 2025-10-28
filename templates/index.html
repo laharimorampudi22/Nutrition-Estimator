@@ -1,29 +1,27 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <title>Nutrition Estimator</title>
-  <link rel="stylesheet" href="/static/style.css">
+    <title>Easy Nutrition Estimator</title>
+    <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-  <div class="container">
-    <h2>Nutrition Estimator</h2>
-    <form action="/predict" method="post">
-      <label>Enter ingredients (comma separated):</label><br>
-      <input type="text" name="ingredients" placeholder="e.g. 2 cups rice, 1 tbsp oil, 200g chicken" required>
-      <button type="submit">Estimate</button>
-    </form>
+    <div class="container">
+        <h2>🥗 Nutrition Estimator</h2>
+        <form action="/predict" method="post">
+            <textarea name="ingredients" rows="4" cols="40" placeholder="Enter ingredients, e.g. 2 cups rice, 1 tbsp oil, 200g chicken"></textarea>
+            <br><br>
+            <button type="submit">Estimate</button>
+        </form>
 
-    {% if result %}
-      <div class="result">
-        <h3>Result for: {{ ingredients }}</h3>
-        <p><b>Calories:</b> {{ result.kcal }} kcal</p>
-        <p><b>Protein:</b> {{ result.protein }} g</p>
-        <p><b>Fat:</b> {{ result.fat }} g</p>
-        <p><b>Carbs:</b> {{ result.carbs }} g</p>
-      </div>
-    {% endif %}
-  </div>
+        {% if result %}
+        <div class="result">
+            <h3>Estimated Nutrition:</h3>
+            <p><strong>Calories:</strong> {{ result.kcal }} kcal</p>
+            <p><strong>Protein:</strong> {{ result.protein }} g</p>
+            <p><strong>Fat:</strong> {{ result.fat }} g</p>
+            <p><strong>Carbs:</strong> {{ result.carbs }} g</p>
+        </div>
+        {% endif %}
+    </div>
 </body>
 </html>
-
