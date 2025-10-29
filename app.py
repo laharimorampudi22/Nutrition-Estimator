@@ -1,45 +1,49 @@
-from fastapi import FastAPI, Request, Form
-from fastapi.responses import HTMLResponse
-from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
+from flask import Flask, render_template, request, jsonify
+import json, re
 
-# ✅ Create FastAPI app
-app = FastAPI()
+app = Flask(__name__)
 
-# ✅ Mount folders
-app.mount("/static", StaticFiles(directory="static"), name="static")
-templates = Jinja2Templates(directory="templates")
+# Load simple nutrition database
+with open('model/nutrition_data.json') as f:
+    NUTRITION_DATA = json.load(f)
 
-# ✅ Simple mock nutrition database
-NUTRITION_DB = {
-    "rice": {"kcal": 130, "protein": 2.7, "fat": 0.3, "carbs": 28},
-    "oil": {"kcal": 884, "protein": 0, "fat": 100, "carbs": 0},
-    "chicken": {"kcal": 239, "protein": 27, "fat": 14, "carbs": 0},
-    "milk": {"kcal": 42, "protein": 3.4, "fat": 1, "carbs": 5},
-    "egg": {"kcal": 155, "protein": 13, "fat": 11, "carbs": 1.1}
-}
+def estimate_nutrition(ingredients_text):
+    total = {"calories": 0, "protein": 0, "fat": 0, "carbs": 0}
 
-# ✅ Function to estimate totals
-def estimate_nutrition(ingredients: str):
-    total = {"kcal": 0, "protein": 0, "fat": 0, "carbs": 0}
-    for item in ingredients.split(","):
-        words = item.strip().lower().split()
-        for food, vals in NUTRITION_DB.items():
-            if food in words:
+    # Split ingredients by comma
+    ingredients = [i.strip() for i in ingredients_text.split(",")]
+
+    for ing in ingredients:
+        match = re.search(r"([0-9.]+)\\s*(cup|tbsp|tsp|g|gram|grams)?\\s*(.*)", ing)
+        if not match:
+            continue
+        qty = float(match.group(1))
+        unit = match.group(2) or "unit"
+        name = match.group(3).strip().lower()
+
+        for key in NUTRITION_DATA:
+            if key in name:
+                data = NUTRITION_DATA[key]
+                # scale by quantity
+                scale = qty
+                if "cup" in unit: scale *= data.get("g_per_cup", 100) / 100
+                elif "tbsp" in unit: scale *= data.get("g_per_tbsp", 15) / 100
+                elif "g" in unit: scale *= 1 / 100
+
                 for k in total:
-                    total[k] += vals[k]
-    return total
+                    total[k] += data[k] * scale
 
-# ✅ Route for homepage
-@app.get("/", response_class=HTMLResponse)
-def form_page(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+    return {k: round(v, 2) for k, v in total.items()}
 
-# ✅ Route for prediction
-@app.post("/predict", response_class=HTMLResponse)
-def predict(request: Request, ingredients: str = Form(...)):
-    result = estimate_nutrition(ingredients)
-    return templates.TemplateResponse(
-        "index.html",
-        {"request": request, "result": result, "ingredients": ingredients}
-    )
+@app.route("/")
+def home():
+    return render_template("index.html")
+
+@app.route("/estimate", methods=["POST"])
+def estimate():
+    text = request.form["ingredients"]
+    result = estimate_nutrition(text)
+    return jsonify(result)
+
+if __name__ == "__main__":
+    app.run(debug=True)
