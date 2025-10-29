@@ -1,4 +1,5 @@
-echo {>"model\nutrition_data.json"
-echo "rice":{"calories":130,"protein":2.7,"fat":0.3,"carbs":28,"g_per_cup":158},>>"model\nutrition_data.json"
-echo "chicken":{"calories":165,"protein":31,"fat":3.6,"carbs":0,"g_per_cup":140},>>"model\nutrition_data.json"
-echo "oil":{"calories":884,"protein":0,"fat":100,"carbs":0,"g_per_tbsp":13.5}}>>"model\nutrition_data.json"
+{
+  "rice": {"calories": 130, "protein": 2.7, "fat": 0.3, "carbs": 28, "g_per_cup": 158},
+  "chicken": {"calories": 165, "protein": 31, "fat": 3.6, "carbs": 0, "g_per_cup": 140},
+  "oil": {"calories": 884, "protein": 0, "fat": 100, "carbs": 0, "g_per_tbsp": 13.5}
+}
